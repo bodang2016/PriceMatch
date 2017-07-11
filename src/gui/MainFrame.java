@@ -1,14 +1,15 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import pricematch.StrategiesMap;
@@ -16,9 +17,9 @@ import pricematch.StrategyData;
 import pricematch.getPrice;
 
 import javax.swing.JLabel;
-import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,21 @@ public class MainFrame extends JFrame {
 	private JPanel contentPane;
 	private JTextField top10NRTextField;
 	private JTable dataTable;
+	private List<StrategyData> rawData;
+	private DefaultTableModel tableModel;
+	private Object[][] data = { {} };
+	private JScrollPane scroll;
+	final Object[] columnNames = { "Stock", "Percent", "Current", "Cost", "Return", "New Stock" };
+
+	JComboBox<String> strategiesComboBox;
+	JLabel lblWeekData;
+	JLabel lblMonthData;
+	JLabel lblSumData;
+	JLabel Currentstockname;
+	JLabel HSCompare;
+	JLabel ZZCompare;
+	JLabel SZCompare;
+	JLabel NrTopCompare;
 
 	/**
 	 * Launch the application.
@@ -42,6 +58,7 @@ public class MainFrame extends JFrame {
 			public void run() {
 				try {
 					MainFrame frame = new MainFrame();
+					frame.setResizable(false);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -61,10 +78,9 @@ public class MainFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		StrategiesMap comboMap = new StrategiesMap();
-		JComboBox strategiesComboBox = new JComboBox();
-		strategiesComboBox.setBounds(6, 292, 117, 27);
-		Iterator iter = comboMap.getStrategiesMap().entrySet().iterator();
+		strategiesComboBox = new JComboBox<String>();
+		strategiesComboBox.setBounds(6, 311, 117, 27);
+		Iterator iter = StrategiesMap.getStrategiesMap().entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			strategiesComboBox.addItem(entry.getKey().toString());
@@ -72,23 +88,149 @@ public class MainFrame extends JFrame {
 
 		contentPane.add(strategiesComboBox);
 
-		JButton btnFetchData = new JButton("Fetch Data");
-		btnFetchData.setBounds(232, 291, 117, 29);
-		contentPane.add(btnFetchData);
-
 		top10NRTextField = new JTextField();
 		top10NRTextField.setHorizontalAlignment(SwingConstants.CENTER);
-		top10NRTextField.setBounds(135, 291, 85, 26);
+		top10NRTextField.setBounds(135, 311, 85, 26);
 		top10NRTextField.setText("0.00");
 		contentPane.add(top10NRTextField);
 		top10NRTextField.setColumns(10);
 
+		initIndexLabel();
+		initStatsLabel();
+
+		JButton btnSwitch = new JButton("Show Convert");
+		btnSwitch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+		btnSwitch.setBounds(361, 311, 158, 29);
+		contentPane.add(btnSwitch);
+
+		tableModel = new DefaultTableModel(data, columnNames);
+
+		dataTable = new JTable(tableModel);
+
+		dataTable.setPreferredScrollableViewportSize(new Dimension(300, 80));
+		setColumnWidth();
+		dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+		scroll = new JScrollPane(dataTable);
+		scroll.setBounds(15, 105, 500, 200);
+		contentPane.add(scroll);
+
+		JButton btnFetchData = new JButton("Fetch Data");
+		btnFetchData.setBounds(232, 311, 117, 29);
+		contentPane.add(btnFetchData);
+		btnFetchData.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				int strategiesId = StrategiesMap.getStrategiesMap()
+						.get(strategiesComboBox.getSelectedItem().toString());
+				String[] urlsStrategies = {
+						"https://111.202.65.195/zuhe/detail?appVersion=1.5.10&appname=jingdonggupiao&channel=AppStore&deviceId=B786BDBB-C566-356D-68CB-17EA5E6F3E4E&deviceModel=iPhone&deviceToken=cc0415eb05dc5e72fdeb18affebd1e205bf2e04ca99cb4c0deed698915bd2f84&dt=1&gpsp=i9OQ0FogQ7exDSu1KW9wBg%3D%3D&id="
+								+ strategiesId
+								+ "&idfa=B786BDBB-C566-356D-F2DA-AD8B5CC5F14B&jailBroken=false&lan=en-CN&machineName=iPhone9%2C2&mm=ddfa3a8e60834ef2265666cdc6f105c0&partner=AppStore&platCode=3&platVersion=10.3.2&screen=1242%2A2208&timestamp=1499455555&wsKey=AAFZR0U7AEDoUpvaqLvLp3KWPKng-P1vpmRxY7MOQxJB335ilg5BFdcOPoo3GKwMpSl3iJfl8tcu8Zam5OtG-VIoefFyxX5Y" };
+				rawData = getPrice.getStrategiesData(urlsStrategies);
+				compareHeader();
+				data = new Object[rawData.get(0).getInStock().size()][6];
+				for (int i = 0; i < rawData.get(0).getInStock().size(); i++) {
+					for (int j = 0; j < 6; j++) {
+						switch (j) {
+						case 0:
+							data[i][j] = rawData.get(0).getInStock().get(i).getName();
+							break;
+						case 1:
+							data[i][j] = rawData.get(0).getInStock().get(i).getPrcent();
+							break;
+						case 2:
+							data[i][j] = rawData.get(0).getInStock().get(i).getCurrentPrice();
+							break;
+						case 3:
+							data[i][j] = rawData.get(0).getInStock().get(i).getCostPrice();
+							break;
+						case 4:
+							data[i][j] = rawData.get(0).getInStock().get(i).getReturnRateSum();
+							break;
+						case 5:
+							data[i][j] = "";
+							break;
+						}
+					}
+				}
+				tableModel = new DefaultTableModel(data, columnNames);
+				dataTable.setModel(tableModel);
+				setColumnWidth();
+				tableModel.fireTableDataChanged();
+			}
+
+		});
+
+		this.setVisible(true);
+	}
+
+	private void setColumnWidth() {
+		TableColumn column = null;
+		int colunms = dataTable.getColumnCount();
+		for (int i = 0; i < colunms; i++) {
+			column = dataTable.getColumnModel().getColumn(i);
+			column.setPreferredWidth(82);
+		}
+	}
+
+	private void compareHeader() {
+		if (!rawData.isEmpty()) {
+			String[] stocks = { "sz399300", "sh000852", "sh000001" };
+			List<Double> increases = new ArrayList<Double>();
+			increases = getPrice.getWeekIndexIncrease(stocks);
+			double ReturnRateWeek = rawData.get(0).getReturnRateW();
+
+			Currentstockname.setText(strategiesComboBox.getSelectedItem().toString());
+			lblWeekData.setText(String.valueOf(ReturnRateWeek));
+			lblMonthData.setText(String.valueOf(rawData.get(0).getReturnRateM()));
+			lblSumData.setText(String.valueOf(rawData.get(0).getReturnRateSum()));
+
+			if (ReturnRateWeek < increases.get(0)) {
+				HSCompare.setText("Lose");
+				HSCompare.setBackground(Color.green);
+			} else {
+				HSCompare.setText("Win");
+				HSCompare.setBackground(Color.red);
+			}
+			if (ReturnRateWeek < increases.get(1)) {
+				ZZCompare.setText("Lose");
+				ZZCompare.setBackground(Color.green);
+			} else {
+				ZZCompare.setText("Win");
+				ZZCompare.setBackground(Color.red);
+			}
+			if (ReturnRateWeek < increases.get(2)) {
+				SZCompare.setText("Lose");
+				SZCompare.setBackground(Color.green);
+			} else {
+				SZCompare.setText("Win");
+				SZCompare.setBackground(Color.red);
+			}
+			if (ReturnRateWeek < Double.valueOf(top10NRTextField.getText())) {
+				NrTopCompare.setText("Lose");
+				NrTopCompare.setBackground(Color.green);
+			} else {
+				NrTopCompare.setText("Win");
+				NrTopCompare.setBackground(Color.red);
+			}
+		}
+	}
+
+	private void initIndexLabel() {
 		JLabel lblCurrent = new JLabel("Current:");
 		lblCurrent.setBounds(6, 6, 61, 16);
 		contentPane.add(lblCurrent);
 
-		JLabel Currentstockname = new JLabel("/");
+		Currentstockname = new JLabel("/");
 		Currentstockname.setHorizontalAlignment(SwingConstants.CENTER);
+		Currentstockname.setFont(new Font("宋体", Font.BOLD, 16));
 		Currentstockname.setBounds(16, 34, 117, 29);
 		contentPane.add(Currentstockname);
 
@@ -96,79 +238,74 @@ public class MainFrame extends JFrame {
 		lblHS300.setBounds(135, 6, 61, 16);
 		contentPane.add(lblHS300);
 
-		JLabel HSCompare = new JLabel("/");
+		HSCompare = new JLabel("/");
 		HSCompare.setHorizontalAlignment(SwingConstants.CENTER);
-		HSCompare.setBounds(145, 34, 117, 29);
+		HSCompare.setBounds(145, 34, 77, 29);
+		HSCompare.setOpaque(true);
+		HSCompare.setBackground(Color.gray);
 		contentPane.add(HSCompare);
 
 		JLabel lblZz = new JLabel("ZZ1000:");
-		lblZz.setBounds(263, 6, 61, 16);
+		lblZz.setBounds(233, 6, 61, 16);
 		contentPane.add(lblZz);
 
-		JLabel ZZCompare = new JLabel("/");
+		ZZCompare = new JLabel("/");
 		ZZCompare.setHorizontalAlignment(SwingConstants.CENTER);
-		ZZCompare.setBounds(273, 34, 117, 29);
+		ZZCompare.setBounds(243, 34, 77, 29);
+		ZZCompare.setOpaque(true);
+		ZZCompare.setBackground(Color.gray);
 		contentPane.add(ZZCompare);
 
 		JLabel lblSzIndex = new JLabel("SZ Index:");
-		lblSzIndex.setBounds(392, 6, 85, 16);
+		lblSzIndex.setBounds(332, 6, 85, 16);
 		contentPane.add(lblSzIndex);
 
-		JLabel SZCompare = new JLabel("/");
+		SZCompare = new JLabel("/");
 		SZCompare.setHorizontalAlignment(SwingConstants.CENTER);
-		SZCompare.setBounds(402, 34, 117, 29);
+		SZCompare.setBounds(342, 34, 77, 29);
+		SZCompare.setOpaque(true);
+		SZCompare.setBackground(Color.gray);
 		contentPane.add(SZCompare);
 
-		JButton btnSwitch = new JButton("Show Convert");
-		btnSwitch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnSwitch.setBounds(361, 291, 158, 29);
-		contentPane.add(btnSwitch);
+		JLabel lblNrTop = new JLabel("NR TOP10:");
+		lblNrTop.setBounds(431, 6, 85, 16);
+		contentPane.add(lblNrTop);
 
-		final Object[] columnNames = { "Stock", "Percent", "Current", "Cost", "Return", "New Stock" };
-		String[] urlsStrategies = {
-				"https://111.202.65.195/zuhe/detail?appVersion=1.5.10&appname=jingdonggupiao&channel=AppStore&deviceId=B786BDBB-C566-356D-68CB-17EA5E6F3E4E&deviceModel=iPhone&deviceToken=cc0415eb05dc5e72fdeb18affebd1e205bf2e04ca99cb4c0deed698915bd2f84&dt=1&gpsp=i9OQ0FogQ7exDSu1KW9wBg%3D%3D&id=12177&idfa=B786BDBB-C566-356D-F2DA-AD8B5CC5F14B&jailBroken=false&lan=en-CN&machineName=iPhone9%2C2&mm=ddfa3a8e60834ef2265666cdc6f105c0&partner=AppStore&platCode=3&platVersion=10.3.2&screen=1242%2A2208&timestamp=1499455555&wsKey=AAFZR0U7AEDoUpvaqLvLp3KWPKng-P1vpmRxY7MOQxJB335ilg5BFdcOPoo3GKwMpSl3iJfl8tcu8Zam5OtG-VIoefFyxX5Y" };
-		List<StrategyData> rawData = getPrice.getStrategiesData(urlsStrategies);
-		Object[][] data = new Object[rawData.get(0).getInStock().size()][6];
-		for (int i = 0; i < rawData.get(0).getInStock().size(); i++) {
-			for (int j = 0; j < 6; j++) {
-				switch (j) {
-				case 0:
-					data[i][j] = rawData.get(0).getInStock().get(i).getName();
-					break;
-				case 1:
-					data[i][j] = rawData.get(0).getInStock().get(i).getPrcent();
-					break;
-				case 2:
-					data[i][j] = rawData.get(0).getInStock().get(i).getCurrentPrice();
-					break;
-				case 3:
-					data[i][j] = rawData.get(0).getInStock().get(i).getCostPrice();
-					break;
-				case 4:
-					data[i][j] = rawData.get(0).getInStock().get(i).getReturnRateSum();
-					break;
-				case 5:
-					data[i][j] = "";
-					break;
-				}
-			}
-		}
-		dataTable = new JTable(data, columnNames);
-		dataTable.setPreferredScrollableViewportSize(new Dimension(300, 80));
-		TableColumn column = null;
-		int colunms = dataTable.getColumnCount();
-		for (int i = 0; i < colunms; i++) {
-			column = dataTable.getColumnModel().getColumn(i);
-			column.setPreferredWidth(82);
-		}
-		dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		NrTopCompare = new JLabel("/");
+		NrTopCompare.setHorizontalAlignment(SwingConstants.CENTER);
+		NrTopCompare.setBounds(441, 34, 77, 29);
+		NrTopCompare.setOpaque(true);
+		NrTopCompare.setBackground(Color.gray);
+		contentPane.add(NrTopCompare);
+	}
 
-		JScrollPane scroll = new JScrollPane(dataTable);
-		scroll.setBounds(15, 85, 500, 200);
-		contentPane.add(scroll);
-		this.setVisible(true);
+	private void initStatsLabel() {
+
+		JLabel lblWeek = new JLabel("Week:");
+		lblWeek.setBounds(135, 66, 61, 16);
+		contentPane.add(lblWeek);
+
+		lblWeekData = new JLabel("/");
+		lblWeekData.setHorizontalAlignment(SwingConstants.CENTER);
+		lblWeekData.setBounds(145, 86, 77, 11);
+		contentPane.add(lblWeekData);
+
+		JLabel lblMonth = new JLabel("Month:");
+		lblMonth.setBounds(233, 66, 61, 16);
+		contentPane.add(lblMonth);
+
+		lblMonthData = new JLabel("/");
+		lblMonthData.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMonthData.setBounds(243, 86, 77, 11);
+		contentPane.add(lblMonthData);
+
+		JLabel lblSum = new JLabel("Sum:");
+		lblSum.setBounds(332, 66, 85, 16);
+		contentPane.add(lblSum);
+
+		lblSumData = new JLabel("/");
+		lblSumData.setHorizontalAlignment(SwingConstants.CENTER);
+		lblSumData.setBounds(342, 86, 77, 11);
+		contentPane.add(lblSumData);
 	}
 }
