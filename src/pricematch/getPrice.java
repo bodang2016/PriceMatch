@@ -42,6 +42,7 @@ public class getPrice {
 					lastWeekPriceValue = Double.parseDouble(lastPriceDataset[2]);
 					bo.reset();
 					u = new URL("http://hq.sinajs.cn/list=" + stocks[index]);
+					in.close();
 					in = u.openStream();
 					while ((i = in.read(b)) != -1) {
 						bo.write(b, 0, i);
