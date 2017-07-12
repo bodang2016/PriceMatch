@@ -19,6 +19,7 @@ import pricematch.getPrice;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,7 @@ public class MainFrame extends JFrame {
 	private Object[][] data = { {} };
 	private JScrollPane scroll;
 	final Object[] columnNames = { "Stock", "Percent", "Current", "Cost", "Return", "New Stock" };
+	private DecimalFormat df = new DecimalFormat("#0.00");
 
 	JComboBox<String> strategiesComboBox;
 	JLabel lblWeekData;
@@ -143,7 +145,7 @@ public class MainFrame extends JFrame {
 							data[i][j] = rawData.get(0).getInStock().get(i).getName();
 							break;
 						case 1:
-							data[i][j] = rawData.get(0).getInStock().get(i).getPrcent();
+							data[i][j] = df.format(rawData.get(0).getInStock().get(i).getPrcent() * 100) + "%";
 							break;
 						case 2:
 							data[i][j] = rawData.get(0).getInStock().get(i).getCurrentPrice();
@@ -152,7 +154,7 @@ public class MainFrame extends JFrame {
 							data[i][j] = rawData.get(0).getInStock().get(i).getCostPrice();
 							break;
 						case 4:
-							data[i][j] = rawData.get(0).getInStock().get(i).getReturnRateSum();
+							data[i][j] = df.format(rawData.get(0).getInStock().get(i).getReturnRateSum() * 100) + "%";
 							break;
 						case 5:
 							data[i][j] = "";
@@ -188,36 +190,36 @@ public class MainFrame extends JFrame {
 			double ReturnRateWeek = rawData.get(0).getReturnRateW();
 
 			Currentstockname.setText(strategiesComboBox.getSelectedItem().toString());
-			lblWeekData.setText(String.valueOf(ReturnRateWeek));
-			lblMonthData.setText(String.valueOf(rawData.get(0).getReturnRateM()));
-			lblSumData.setText(String.valueOf(rawData.get(0).getReturnRateSum()));
+			lblWeekData.setText(String.valueOf(df.format(ReturnRateWeek * 100)) + "%");
+			lblMonthData.setText(String.valueOf(df.format(rawData.get(0).getReturnRateM() * 100)) + "%");
+			lblSumData.setText(String.valueOf(df.format(rawData.get(0).getReturnRateSum() * 100)) + "%");
 
 			if (ReturnRateWeek < increases.get(0)) {
-				HSCompare.setText("Lose");
+				HSCompare.setText(df.format(increases.get(0) * 100).toString() + "%");
 				HSCompare.setBackground(Color.green);
 			} else {
-				HSCompare.setText("Win");
+				HSCompare.setText(df.format(increases.get(0) * 100).toString() + "%");
 				HSCompare.setBackground(Color.red);
 			}
 			if (ReturnRateWeek < increases.get(1)) {
-				ZZCompare.setText("Lose");
+				ZZCompare.setText(df.format(increases.get(1) * 100).toString() + "%");
 				ZZCompare.setBackground(Color.green);
 			} else {
-				ZZCompare.setText("Win");
+				ZZCompare.setText(df.format(increases.get(1) * 100).toString() + "%");
 				ZZCompare.setBackground(Color.red);
 			}
 			if (ReturnRateWeek < increases.get(2)) {
-				SZCompare.setText("Lose");
+				SZCompare.setText(df.format(increases.get(2) * 100).toString() + "%");
 				SZCompare.setBackground(Color.green);
 			} else {
-				SZCompare.setText("Win");
+				SZCompare.setText(df.format(increases.get(2) * 100).toString() + "%");
 				SZCompare.setBackground(Color.red);
 			}
-			if (ReturnRateWeek < Double.valueOf(top10NRTextField.getText())) {
-				NrTopCompare.setText("Lose");
+			if (ReturnRateWeek < Double.valueOf(top10NRTextField.getText()) / 100) {
+				NrTopCompare.setText(top10NRTextField.getText() + "%");
 				NrTopCompare.setBackground(Color.green);
 			} else {
-				NrTopCompare.setText("Win");
+				NrTopCompare.setText(top10NRTextField.getText() + "%");
 				NrTopCompare.setBackground(Color.red);
 			}
 		}

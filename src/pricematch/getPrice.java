@@ -20,6 +20,8 @@ import jsonCompiler.StocksValues;
 
 public class getPrice {
 	public static List<Double> getWeekIndexIncrease(String[] stocks) {
+		double lastWeekPriceValue = 0;
+		double thisWeekPriceValue = 0;
 		List<Double> increase = new ArrayList<Double>();
 		try {
 			byte[] b = new byte[256];
@@ -27,7 +29,7 @@ public class getPrice {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			for (int index = 0; index < stocks.length; index++) {
 				try {
-					URL u = new URL("http://data.gtimg.cn/flashdata/hushen/weekly/" + stocks[index] + ".js");
+					URL u = new URL("http://data.gtimg.cn/flashdata/hushen/latest/weekly/" + stocks[index] + ".js");
 					in = u.openStream();
 					int i;
 					while ((i = in.read(b)) != -1) {
@@ -35,12 +37,19 @@ public class getPrice {
 					}
 					String result = bo.toString();
 					String[] weeks = result.split("\\n");
-					String thisWeekPrice = weeks[weeks.length - 2];
 					String lastWeekPrice = weeks[weeks.length - 3];
-					String[] thisPriceDataset = thisWeekPrice.split(" ");
 					String[] lastPriceDataset = lastWeekPrice.split(" ");
-					increase.add((Double.parseDouble(thisPriceDataset[2]) - Double.parseDouble(lastPriceDataset[2]))
-							/ Double.parseDouble(lastPriceDataset[2]) * 100);
+					lastWeekPriceValue = Double.parseDouble(lastPriceDataset[2]);
+					bo.reset();
+					u = new URL("http://hq.sinajs.cn/list=" + stocks[index]);
+					in = u.openStream();
+					while ((i = in.read(b)) != -1) {
+						bo.write(b, 0, i);
+					}
+					result = bo.toString();
+					weeks = result.split(",");
+					thisWeekPriceValue = Double.parseDouble(weeks[3]);
+					increase.add((thisWeekPriceValue - lastWeekPriceValue) / lastWeekPriceValue);
 					bo.reset();
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
