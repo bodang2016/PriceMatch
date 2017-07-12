@@ -74,7 +74,7 @@ public class MainFrame extends JFrame {
 	 */
 	public MainFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 532, 368);
+		setBounds(100, 100, 532, 378);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -131,10 +131,7 @@ public class MainFrame extends JFrame {
 				// TODO Auto-generated method stub
 				int strategiesId = StrategiesMap.getStrategiesMap()
 						.get(strategiesComboBox.getSelectedItem().toString());
-				String[] urlsStrategies = {
-						"https://111.202.65.195/zuhe/detail?appVersion=1.5.10&appname=jingdonggupiao&channel=AppStore&deviceId=B786BDBB-C566-356D-68CB-17EA5E6F3E4E&deviceModel=iPhone&deviceToken=cc0415eb05dc5e72fdeb18affebd1e205bf2e04ca99cb4c0deed698915bd2f84&dt=1&gpsp=i9OQ0FogQ7exDSu1KW9wBg%3D%3D&id="
-								+ strategiesId
-								+ "&idfa=B786BDBB-C566-356D-F2DA-AD8B5CC5F14B&jailBroken=false&lan=en-CN&machineName=iPhone9%2C2&mm=ddfa3a8e60834ef2265666cdc6f105c0&partner=AppStore&platCode=3&platVersion=10.3.2&screen=1242%2A2208&timestamp=1499455555&wsKey=AAFZR0U7AEDoUpvaqLvLp3KWPKng-P1vpmRxY7MOQxJB335ilg5BFdcOPoo3GKwMpSl3iJfl8tcu8Zam5OtG-VIoefFyxX5Y" };
+				String[] urlsStrategies = { "https://111.202.65.195/zuhe/detail?id=" + strategiesId };
 				rawData = getPrice.getStrategiesData(urlsStrategies);
 				compareHeader();
 				data = new Object[rawData.get(0).getInStock().size()][6];
