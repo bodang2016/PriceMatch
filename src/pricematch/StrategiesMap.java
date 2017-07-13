@@ -23,6 +23,8 @@ public class StrategiesMap {
 		strategiesMap.put("上升三角", 12236);
 		strategiesMap.put("短线突击", 12235);
 		strategiesMap.put("箱型震荡", 12243);
+		strategiesMap.put("W底", 12289);
+		strategiesMap.put("空中加油", 00000);
 		return strategiesMap;
 	}
 }
