@@ -106,6 +106,7 @@ public class MainFrame extends JFrame {
 
 			}
 		});
+		btnSwitch.setEnabled(false);
 		btnSwitch.setBounds(361, 311, 158, 29);
 		contentPane.add(btnSwitch);
 
