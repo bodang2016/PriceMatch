@@ -29,7 +29,7 @@ public class getPrice {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			for (int index = 0; index < stocks.length; index++) {
 				try {
-					URL u = new URL("http://data.gtimg.cn/flashdata/hushen/latest/weekly/" + stocks[index] + ".js");
+					URL u = new URL("http://data.gtimg.cn/flashdata/hushen/latest/daily/" + stocks[index] + ".js");
 					in = u.openStream();
 					int i;
 					while ((i = in.read(b)) != -1) {
@@ -37,7 +37,7 @@ public class getPrice {
 					}
 					String result = bo.toString();
 					String[] weeks = result.split("\\n");
-					String lastWeekPrice = weeks[weeks.length - 3];
+					String lastWeekPrice = weeks[weeks.length - 7];
 					String[] lastPriceDataset = lastWeekPrice.split(" ");
 					lastWeekPriceValue = Double.parseDouble(lastPriceDataset[2]);
 					bo.reset();
